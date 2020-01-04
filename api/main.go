@@ -33,7 +33,7 @@ type event struct {
 
 type person struct {
 	Name string `json:"Name"`
-	Age  int    `json:"Age"`
+	Age  int64  `json:"Age"`
 }
 
 type allEvents []event
@@ -67,17 +67,19 @@ var person2 = person{
 	Age:  66,
 }
 
-func runSeeds() error {
+func establishConnection() error {
 	if driver, err = neo4j.NewDriver(uri, neo4j.BasicAuth(username, password, ""), func(config *neo4j.Config) {
 		config.Log = neo4j.ConsoleLogger(neo4j.ERROR)
 	}); err != nil {
 		return err
 	}
-	defer driver.Close()
 	if session, err = driver.Session(neo4j.AccessModeWrite); err != nil {
 		return err
 	}
-	defer session.Close()
+	return nil
+}
+
+func runSeeds() error {
 	_, err = session.Run("MATCH (n) DETACH DELETE n", map[string]interface{}{})
 	if err != nil {
 		return err
@@ -109,6 +111,31 @@ func runSeeds() error {
 	return nil
 }
 
+func getAll(w http.ResponseWriter, r *http.Request) {
+	persons := []person{}
+	result, err := session.Run("MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons.Name, persons.Age",
+		map[string]interface{}{})
+	if err != nil {
+		fmt.Fprintf(w, "db err")
+	}
+	for result.Next() {
+		record := result.Record()
+		fmt.Println(record)
+		personToAdd := person{}
+		if value, ok := record.Get("persons.Name"); ok {
+			fmt.Println(value)
+			personToAdd.Name = value.(string)
+		}
+		if value, ok := record.Get("persons.Age"); ok {
+			personToAdd.Age = value.(int64)
+		}
+		persons = append(persons, personToAdd)
+
+	}
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(persons)
+}
+
 func seeds(w http.ResponseWriter, r *http.Request) {
 	if err := runSeeds(); err != nil {
 		log.Fatal(err)
@@ -137,10 +164,6 @@ func getOneEvent(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(singleEvent)
 		}
 	}
-}
-
-func getAllEvents(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(events)
 }
 
 func updateEvent(w http.ResponseWriter, r *http.Request) {
@@ -186,16 +209,22 @@ func commonMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+	if err := establishConnection(); err != nil {
+		log.Fatal(err)
+		fmt.Println("Cannot connect to db")
+	}
 	port := ":8080"
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(commonMiddleware)
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/seeds", seeds).Methods("POST")
 	router.HandleFunc("/events", createEvent).Methods("POST")
-	router.HandleFunc("/events", getAllEvents).Methods("GET")
+	router.HandleFunc("/events", getAll).Methods("GET")
 	router.HandleFunc("/events/{id}", getOneEvent).Methods("GET")
 	router.HandleFunc("/events/{id}", updateEvent).Methods("PATCH")
 	router.HandleFunc("/events/{id}", deleteEvent).Methods("DELETE")
 	fmt.Println("Server listening on port", port)
 	log.Fatal(http.ListenAndServe(port, router))
+	defer driver.Close()
+	defer session.Close()
 }
