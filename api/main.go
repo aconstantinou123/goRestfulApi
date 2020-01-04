@@ -80,10 +80,10 @@ func runSeeds() error {
 	defer session.Close()
 	_, err = session.Run("MATCH (n) DETACH DELETE n", map[string]interface{}{})
 	if err != nil {
-		return err // handle error
+		return err
 	}
-
-	result, err = session.Run("CREATE (n:Person { Name: $Name, Age: $Age }) - [:ATTENDED] -> (m:Event { ID: $ID, Title: $Title, Description: $Description })",
+	result, err = session.Run("CREATE (n:Person { Name: $Name, Age: $Age }) - [:ATTENDED]"+
+		"-> (m:Event { ID: $ID, Title: $Title, Description: $Description })",
 		map[string]interface{}{
 			"Name":        person1.Name,
 			"Age":         person1.Age,
@@ -92,9 +92,10 @@ func runSeeds() error {
 			"Description": event1.Description,
 		})
 	if err != nil {
-		return err // handle error
+		return err
 	}
-	result, err = session.Run("CREATE (n:Person { Name: $Name, Age: $Age }) - [:ATTENDED] -> (m:Event { ID: $ID, Title: $Title, Description: $Description })",
+	result, err = session.Run("CREATE (n:Person { Name: $Name, Age: $Age }) - [:ATTENDED]"+
+		"-> (m:Event { ID: $ID, Title: $Title, Description: $Description })",
 		map[string]interface{}{
 			"Name":        person2.Name,
 			"Age":         person2.Age,
@@ -103,10 +104,7 @@ func runSeeds() error {
 			"Description": event2.Description,
 		})
 	if err != nil {
-		return err // handle error
-	}
-	if err != nil {
-		return err // handle error
+		return err
 	}
 	return nil
 }
