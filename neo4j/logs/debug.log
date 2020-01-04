@@ -2031,3 +2031,54 @@
 2020-01-04 14:56:04.146+0000 INFO [o.n.i.d.DiagnosticsManager] --- SERVER STARTED END ---
 2020-01-04 15:02:47.477+0000 WARN [o.n.b.r.DefaultBoltConnection] The client is unauthorized due to authentication failure.
 2020-01-04 15:03:19.005+0000 WARN [o.n.b.r.DefaultBoltConnection] The client is unauthorized due to authentication failure.
+2020-01-04 15:06:36.646+0000 WARN [o.n.b.t.p.ProtocolHandshaker] Unsupported connection type: 'HTTP'. Bolt protocol only operates over a TCP connection or WebSocket.
+2020-01-04 15:06:36.665+0000 WARN [o.n.b.t.p.ProtocolHandshaker] Unsupported connection type: 'HTTP'. Bolt protocol only operates over a TCP connection or WebSocket.
+2020-01-04 15:11:17.620+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=279, gcTime=0, gcCount=0}
+2020-01-04 15:18:57.176+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 5 checkpoint started...
+2020-01-04 15:18:57.223+0000 INFO [o.n.k.i.s.c.CountsTracker] Rotated counts store at transaction 5 to [/data/databases/graph.db/neostore.counts.db.b], from [/data/databases/graph.db/neostore.counts.db.a].
+2020-01-04 15:18:57.234+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 5 checkpoint completed in 55ms
+2020-01-04 15:18:57.236+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0
+2020-01-04 15:20:17.356+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1204, gcTime=0, gcCount=0}
+2020-01-04 16:08:43.015+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1298, gcTime=0, gcCount=0}
+2020-01-04 16:14:05.103+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=939, gcTime=0, gcCount=0}
+2020-01-04 16:15:05.415+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 4082 seconds: 
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Kernel") yield attributes
+RETURN {name: 'Kernel', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Store file sizes") yield attributes
+RETURN {name: 'Store file sizes', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Configuration") yield attributes
+RETURN {name: 'Configuration', data: collect(attributes)} as result
+
+2020-01-04 16:15:05.416+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 4082 seconds: 
+CALL db.labels() YIELD label
+RETURN {name:'labels', data:COLLECT(label)[..1000]} as result
+UNION ALL
+CALL db.relationshipTypes() YIELD relationshipType
+RETURN {name:'relationshipTypes', data:COLLECT(relationshipType)[..1000]} as result
+UNION ALL
+CALL db.propertyKeys() YIELD propertyKey
+RETURN {name:'propertyKeys', data:COLLECT(propertyKey)[..1000]} as result
+UNION ALL
+CALL dbms.functions() YIELD name, signature, description
+RETURN {name:'functions', data: collect({name: name, signature: signature, description: description})} AS result
+UNION ALL
+CALL dbms.procedures() YIELD name, signature, description
+RETURN {name:'procedures', data:collect({name: name, signature: signature, description: description})} as result
+UNION ALL
+MATCH () RETURN { name:'nodes', data:count(*) } AS result
+UNION ALL
+MATCH ()-[]->() RETURN { name:'relationships', data: count(*)} AS result
+
+2020-01-04 16:17:05.940+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 4153 seconds: EXPLAIN MATCH (n:Item) RETURN n
+2020-01-04 16:17:06.246+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 4153 seconds: MATCH (a)-[r]->(b) WHERE id(a) IN $existingNodeIds AND id(b) IN $newNodeIds RETURN r;
+2020-01-04 16:17:40.839+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 4393 seconds: CREATE (n:Item { id: $id, name: $name }) RETURN n.id, n.name
+2020-01-04 16:21:28.392+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 31 checkpoint started...
+2020-01-04 16:21:28.435+0000 INFO [o.n.k.i.s.c.CountsTracker] Rotated counts store at transaction 31 to [/data/databases/graph.db/neostore.counts.db.a], from [/data/databases/graph.db/neostore.counts.db.b].
+2020-01-04 16:21:28.453+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 31 checkpoint completed in 58ms
+2020-01-04 16:21:28.455+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0
+2020-01-04 16:36:27.515+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 53 checkpoint started...
+2020-01-04 16:36:27.535+0000 INFO [o.n.k.i.s.c.CountsTracker] Rotated counts store at transaction 53 to [/data/databases/graph.db/neostore.counts.db.b], from [/data/databases/graph.db/neostore.counts.db.a].
+2020-01-04 16:36:27.545+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 53 checkpoint completed in 28ms
+2020-01-04 16:36:27.546+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0

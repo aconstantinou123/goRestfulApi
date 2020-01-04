@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
@@ -32,6 +31,11 @@ type event struct {
 	Description string `json:"Description"`
 }
 
+type person struct {
+	Name string `json:"Name"`
+	Age  int    `json:"Age"`
+}
+
 type allEvents []event
 
 var events = allEvents{
@@ -42,7 +46,28 @@ var events = allEvents{
 	},
 }
 
-func run() error {
+var event1 = event{
+	ID:          "1",
+	Title:       "Introduction to Golang",
+	Description: "Come join us for a chance to learn how golang works and get to eventually try it out",
+}
+var event2 = event{
+	ID:          "2",
+	Title:       "Advanced Golang",
+	Description: "Come join us for a chance to learn advanced golang",
+}
+
+var person1 = person{
+	Name: "Vladimir Putin",
+	Age:  67,
+}
+
+var person2 = person{
+	Name: "Xi Jinping",
+	Age:  66,
+}
+
+func runSeeds() error {
 	if driver, err = neo4j.NewDriver(uri, neo4j.BasicAuth(username, password, ""), func(config *neo4j.Config) {
 		config.Log = neo4j.ConsoleLogger(neo4j.ERROR)
 	}); err != nil {
@@ -53,22 +78,46 @@ func run() error {
 		return err
 	}
 	defer session.Close()
-
-	result, err = session.Run("CREATE (n:Item { id: $id, name: $name }) RETURN n.id, n.name", map[string]interface{}{
-		"id":   1,
-		"name": "Item 1",
-	})
+	_, err = session.Run("MATCH (n) DETACH DELETE n", map[string]interface{}{})
 	if err != nil {
 		return err // handle error
 	}
 
-	for result.Next() {
-		fmt.Printf("Created Item with Id = '%d' and Name = '%s'\n", result.Record().GetByIndex(0).(int64), result.Record().GetByIndex(1).(string))
+	result, err = session.Run("CREATE (n:Person { Name: $Name, Age: $Age }) - [:ATTENDED] -> (m:Event { ID: $ID, Title: $Title, Description: $Description })",
+		map[string]interface{}{
+			"Name":        person1.Name,
+			"Age":         person1.Age,
+			"ID":          event1.ID,
+			"Title":       event1.Title,
+			"Description": event1.Description,
+		})
+	if err != nil {
+		return err // handle error
 	}
-	if err = result.Err(); err != nil {
+	result, err = session.Run("CREATE (n:Person { Name: $Name, Age: $Age }) - [:ATTENDED] -> (m:Event { ID: $ID, Title: $Title, Description: $Description })",
+		map[string]interface{}{
+			"Name":        person2.Name,
+			"Age":         person2.Age,
+			"ID":          event2.ID,
+			"Title":       event2.Title,
+			"Description": event2.Description,
+		})
+	if err != nil {
+		return err // handle error
+	}
+	if err != nil {
 		return err // handle error
 	}
 	return nil
+}
+
+func seeds(w http.ResponseWriter, r *http.Request) {
+	if err := runSeeds(); err != nil {
+		log.Fatal(err)
+		fmt.Fprintf(w, "Error running seeds")
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode("Done")
 }
 
 func createEvent(w http.ResponseWriter, r *http.Request) {
@@ -139,14 +188,11 @@ func commonMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-	if err := run(); err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
 	port := ":8080"
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(commonMiddleware)
 	router.HandleFunc("/", homeLink)
+	router.HandleFunc("/seeds", seeds).Methods("POST")
 	router.HandleFunc("/events", createEvent).Methods("POST")
 	router.HandleFunc("/events", getAllEvents).Methods("GET")
 	router.HandleFunc("/events/{id}", getOneEvent).Methods("GET")
