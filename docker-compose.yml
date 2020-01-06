@@ -16,7 +16,7 @@ services:
   go-restful-api:
     build: ./api
     ports:
-      - '8080:8080'
+      - 8080:8080
     links:
       - neo4j:neo4j
     depends_on:

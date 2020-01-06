@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
+        "github.com/mitchellh/mapstructure"
 )
 
 var (
@@ -112,28 +113,42 @@ func runSeeds() error {
 }
 
 func getAll(w http.ResponseWriter, r *http.Request) {
-	persons := []person{}
-	result, err := session.Run("MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons.Name, persons.Age",
+        persons := []person{}
+        eventsToReturn := []event{}
+	result, err := session.Run("MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons, events",
 		map[string]interface{}{})
 	if err != nil {
 		fmt.Fprintf(w, "db err")
 	}
 	for result.Next() {
 		record := result.Record()
-		fmt.Println(record)
 		personToAdd := person{}
-		if value, ok := record.Get("persons.Name"); ok {
-			fmt.Println(value)
-			personToAdd.Name = value.(string)
-		}
-		if value, ok := record.Get("persons.Age"); ok {
-			personToAdd.Age = value.(int64)
+		if value, ok := record.Get("persons"); ok {
+			node := value.(neo4j.Node)
+			props := node.Props()
+                        err := mapstructure.Decode(props, &personToAdd)
+                        if err != nil {
+                            fmt.Println("parse err", err)
+                        }
+                }
+                eventToAdd := event{}
+		if value, ok := record.Get("events"); ok {
+			node := value.(neo4j.Node)
+			props := node.Props()
+                        err := mapstructure.Decode(props, &eventToAdd)
+                        if err != nil {
+                            fmt.Println("parse err", err)
+                        }
 		}
 		persons = append(persons, personToAdd)
-
+		eventsToReturn = append(eventsToReturn, eventToAdd)
 	}
-	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(persons)
+        w.WriteHeader(http.StatusAccepted)
+        data:= map[string]interface{}{
+                "events": eventsToReturn,
+                "persons": persons,
+        }
+	json.NewEncoder(w).Encode(data)
 }
 
 func seeds(w http.ResponseWriter, r *http.Request) {
