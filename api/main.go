@@ -7,9 +7,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/fatih/structs"
 	"github.com/gorilla/mux"
+	"github.com/mitchellh/mapstructure"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
-        "github.com/mitchellh/mapstructure"
 )
 
 var (
@@ -26,44 +27,36 @@ var (
 	err     error
 )
 
-type event struct {
+//Event - struct
+type Event struct {
 	ID          string `json:"ID"`
 	Title       string `json:"Title"`
 	Description string `json:"Description"`
 }
 
-type person struct {
+//Person - struct
+type Person struct {
 	Name string `json:"Name"`
 	Age  int64  `json:"Age"`
 }
 
-type allEvents []event
-
-var events = allEvents{
-	{
-		ID:          "1",
-		Title:       "Introduction to Golang",
-		Description: "Come join us for a chance to learn how golang works and get to eventually try it out",
-	},
-}
-
-var event1 = event{
+var event1 = Event{
 	ID:          "1",
 	Title:       "Introduction to Golang",
 	Description: "Come join us for a chance to learn how golang works and get to eventually try it out",
 }
-var event2 = event{
+var event2 = Event{
 	ID:          "2",
 	Title:       "Advanced Golang",
 	Description: "Come join us for a chance to learn advanced golang",
 }
 
-var person1 = person{
+var person1 = Person{
 	Name: "Vladimir Putin",
 	Age:  67,
 }
 
-var person2 = person{
+var person2 = Person{
 	Name: "Xi Jinping",
 	Age:  66,
 }
@@ -113,8 +106,8 @@ func runSeeds() error {
 }
 
 func getAll(w http.ResponseWriter, r *http.Request) {
-        persons := []person{}
-        eventsToReturn := []event{}
+	persons := []Person{}
+	eventsToReturn := []Event{}
 	result, err := session.Run("MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons, events",
 		map[string]interface{}{})
 	if err != nil {
@@ -122,32 +115,32 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 	}
 	for result.Next() {
 		record := result.Record()
-		personToAdd := person{}
+		personToAdd := Person{}
 		if value, ok := record.Get("persons"); ok {
 			node := value.(neo4j.Node)
 			props := node.Props()
-                        err := mapstructure.Decode(props, &personToAdd)
-                        if err != nil {
-                            fmt.Println("parse err", err)
-                        }
-                }
-                eventToAdd := event{}
+			err := mapstructure.Decode(props, &personToAdd)
+			if err != nil {
+				fmt.Fprintf(w, "parse err")
+			}
+		}
+		eventToAdd := Event{}
 		if value, ok := record.Get("events"); ok {
 			node := value.(neo4j.Node)
 			props := node.Props()
-                        err := mapstructure.Decode(props, &eventToAdd)
-                        if err != nil {
-                            fmt.Println("parse err", err)
-                        }
+			err := mapstructure.Decode(props, &eventToAdd)
+			if err != nil {
+				fmt.Fprintf(w, "parse err")
+			}
 		}
 		persons = append(persons, personToAdd)
 		eventsToReturn = append(eventsToReturn, eventToAdd)
 	}
-        w.WriteHeader(http.StatusAccepted)
-        data:= map[string]interface{}{
-                "events": eventsToReturn,
-                "persons": persons,
-        }
+	w.WriteHeader(http.StatusAccepted)
+	data := map[string]interface{}{
+		"events":  eventsToReturn,
+		"persons": persons,
+	}
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -161,56 +154,97 @@ func seeds(w http.ResponseWriter, r *http.Request) {
 }
 
 func createEvent(w http.ResponseWriter, r *http.Request) {
-	var newEvent event
+	newEvent := Event{}
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Please enter data with the event title and description only in order to update")
+		fmt.Fprintf(w, "Incorrect format")
 	}
 	json.Unmarshal(reqBody, &newEvent)
-	events = append(events, newEvent)
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newEvent)
-}
-
-func getOneEvent(w http.ResponseWriter, r *http.Request) {
-	eventID := mux.Vars(r)["id"]
-	for _, singleEvent := range events {
-		if singleEvent.ID == eventID {
-			json.NewEncoder(w).Encode(singleEvent)
+	cypher := `CREATE(event:Event) SET event = $prop RETURN event`
+	result, err := session.Run(cypher, map[string]interface{}{
+		"prop": structs.Map(newEvent),
+	})
+	createdEvent := Event{}
+	for result.Next() {
+		record := result.Record()
+		if value, ok := record.Get("event"); ok {
+			node := value.(neo4j.Node)
+			props := node.Props()
+			err := mapstructure.Decode(props, &createdEvent)
+			if err != nil {
+				fmt.Fprintf(w, "parse err")
+			}
 		}
 	}
+	json.NewEncoder(w).Encode(createdEvent)
 }
 
-func updateEvent(w http.ResponseWriter, r *http.Request) {
-	eventID := mux.Vars(r)["id"]
-	var updatedEvent event
-
+func createPerson(w http.ResponseWriter, r *http.Request) {
+	newPerson := Person{}
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Please enter data with the event title and description only in order to update")
+		fmt.Fprintf(w, "Incorrect format")
 	}
-	json.Unmarshal(reqBody, &updatedEvent)
-
-	for i, singleEvent := range events {
-		if singleEvent.ID == eventID {
-			singleEvent.Title = updatedEvent.Title
-			singleEvent.Description = updatedEvent.Description
-			events = append(events[:i], singleEvent)
-			json.NewEncoder(w).Encode(singleEvent)
+	json.Unmarshal(reqBody, &newPerson)
+	cypher := `CREATE(person:Person) SET person = $prop RETURN person`
+	result, err := session.Run(cypher, map[string]interface{}{
+		"prop": structs.Map(newPerson),
+	})
+	createdPerson := Person{}
+	for result.Next() {
+		record := result.Record()
+		if value, ok := record.Get("person"); ok {
+			node := value.(neo4j.Node)
+			props := node.Props()
+			err := mapstructure.Decode(props, &createdPerson)
+			if err != nil {
+				fmt.Fprintf(w, "parse err")
+			}
 		}
 	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdPerson)
 }
 
-func deleteEvent(w http.ResponseWriter, r *http.Request) {
-	eventID := mux.Vars(r)["id"]
+// func getOneEvent(w http.ResponseWriter, r *http.Request) {
+// 	eventID := mux.Vars(r)["id"]
+// 	for _, singleEvent := range events {
+// 		if singleEvent.ID == eventID {
+// 			json.NewEncoder(w).Encode(singleEvent)
+// 		}
+// 	}
+// }
 
-	for i, singleEvent := range events {
-		if singleEvent.ID == eventID {
-			events = append(events[:i], events[i+1:]...)
-			fmt.Fprintf(w, "The event with ID %v has been deleted successfully", eventID)
-		}
-	}
-}
+// func updateEvent(w http.ResponseWriter, r *http.Request) {
+// 	eventID := mux.Vars(r)["id"]
+// 	var updatedEvent event
+
+// 	reqBody, err := ioutil.ReadAll(r.Body)
+// 	if err != nil {
+// 		fmt.Fprintf(w, "Please enter data with the event title and description only in order to update")
+// 	}
+// 	json.Unmarshal(reqBody, &updatedEvent)
+
+// 	for i, singleEvent := range events {
+// 		if singleEvent.ID == eventID {
+// 			singleEvent.Title = updatedEvent.Title
+// 			singleEvent.Description = updatedEvent.Description
+// 			events = append(events[:i], singleEvent)
+// 			json.NewEncoder(w).Encode(singleEvent)
+// 		}
+// 	}
+// }
+
+// func deleteEvent(w http.ResponseWriter, r *http.Request) {
+// 	eventID := mux.Vars(r)["id"]
+
+// 	for i, singleEvent := range events {
+// 		if singleEvent.ID == eventID {
+// 			events = append(events[:i], events[i+1:]...)
+// 			fmt.Fprintf(w, "The event with ID %v has been deleted successfully", eventID)
+// 		}
+// 	}
+// }
 
 func homeLink(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome home!")
@@ -234,10 +268,11 @@ func main() {
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/seeds", seeds).Methods("POST")
 	router.HandleFunc("/events", createEvent).Methods("POST")
+	router.HandleFunc("/person", createPerson).Methods("POST")
 	router.HandleFunc("/events", getAll).Methods("GET")
-	router.HandleFunc("/events/{id}", getOneEvent).Methods("GET")
-	router.HandleFunc("/events/{id}", updateEvent).Methods("PATCH")
-	router.HandleFunc("/events/{id}", deleteEvent).Methods("DELETE")
+	// router.HandleFunc("/events/{id}", getOneEvent).Methods("GET")
+	// router.HandleFunc("/events/{id}", updateEvent).Methods("PATCH")
+	// router.HandleFunc("/events/{id}", deleteEvent).Methods("DELETE")
 	fmt.Println("Server listening on port", port)
 	log.Fatal(http.ListenAndServe(port, router))
 	defer driver.Close()

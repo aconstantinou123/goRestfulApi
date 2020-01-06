@@ -3039,3 +3039,146 @@ MATCH ()-[]->() RETURN { name:'relationships', data: count(*)} AS result
 2020-01-06 12:30:29.613+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=250, gcTime=0, gcCount=0}
 2020-01-06 13:17:50.033+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=250, gcTime=0, gcCount=0}
 2020-01-06 13:45:26.629+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=275, gcTime=0, gcCount=0}
+2020-01-06 14:13:41.118+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1247, gcTime=0, gcCount=0}
+2020-01-06 14:16:47.020+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1313, gcTime=0, gcCount=0}
+2020-01-06 14:23:55.774+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=162, gcTime=0, gcCount=0}
+2020-01-06 15:12:00.003+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1264, gcTime=0, gcCount=0}
+2020-01-06 15:15:38.951+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=362, gcTime=0, gcCount=0}
+2020-01-06 15:26:33.819+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=100, gcTime=0, gcCount=0}
+2020-01-06 15:35:32.293+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=157, gcTime=0, gcCount=0}
+2020-01-06 15:39:00.817+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1189, gcTime=0, gcCount=0}
+2020-01-06 15:40:22.641+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1240, gcTime=0, gcCount=0}
+2020-01-06 15:58:48.695+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 79 checkpoint started...
+2020-01-06 15:58:48.754+0000 INFO [o.n.k.i.s.c.CountsTracker] Rotated counts store at transaction 79 to [/data/databases/graph.db/neostore.counts.db.a], from [/data/databases/graph.db/neostore.counts.db.b].
+2020-01-06 15:58:48.784+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 79 checkpoint completed in 86ms
+2020-01-06 15:58:48.787+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0
+2020-01-06 15:58:51.361+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 7291 seconds: MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons, events
+2020-01-06 15:59:38.096+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 20695 seconds: 
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Kernel") yield attributes
+RETURN {name: 'Kernel', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Store file sizes") yield attributes
+RETURN {name: 'Store file sizes', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Configuration") yield attributes
+RETURN {name: 'Configuration', data: collect(attributes)} as result
+
+2020-01-06 15:59:38.111+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 20694 seconds: 
+CALL db.labels() YIELD label
+RETURN {name:'labels', data:COLLECT(label)[..1000]} as result
+UNION ALL
+CALL db.relationshipTypes() YIELD relationshipType
+RETURN {name:'relationshipTypes', data:COLLECT(relationshipType)[..1000]} as result
+UNION ALL
+CALL db.propertyKeys() YIELD propertyKey
+RETURN {name:'propertyKeys', data:COLLECT(propertyKey)[..1000]} as result
+UNION ALL
+CALL dbms.functions() YIELD name, signature, description
+RETURN {name:'functions', data: collect({name: name, signature: signature, description: description})} AS result
+UNION ALL
+CALL dbms.procedures() YIELD name, signature, description
+RETURN {name:'procedures', data:collect({name: name, signature: signature, description: description})} as result
+UNION ALL
+MATCH () RETURN { name:'nodes', data:count(*) } AS result
+UNION ALL
+MATCH ()-[]->() RETURN { name:'relationships', data: count(*)} AS result
+
+2020-01-06 15:59:44.277+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 7785 seconds: EXPLAIN MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons.Name, persons.Age
+2020-01-06 15:59:59.474+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=910, gcTime=0, gcCount=0}
+2020-01-06 16:02:43.391+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x6170931e, L:/172.27.0.2:7687 - R:/172.27.0.3:55100]
+2020-01-06 16:03:35.643+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0xe6e99998, L:/172.27.0.2:7687 - R:/172.27.0.3:55108]
+2020-01-06 16:04:47.337+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x30c4ed1d, L:/172.27.0.2:7687 - R:/172.27.0.3:55114]
+2020-01-06 16:10:18.028+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x883b62a1, L:/172.27.0.2:7687 - R:/172.27.0.3:55120]
+2020-01-06 16:12:52.845+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x7b14e3f7, L:/172.27.0.2:7687 - R:/172.27.0.3:55126]
+2020-01-06 16:13:38.216+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x80f6da77, L:/172.27.0.2:7687 - R:/172.27.0.3:55132]
+2020-01-06 16:13:44.607+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 902 seconds: CREATE(event:Event) SET event = $prop RETURN event
+2020-01-06 16:13:47.876+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 86 checkpoint started...
+2020-01-06 16:13:47.908+0000 INFO [o.n.k.i.s.c.CountsTracker] Rotated counts store at transaction 86 to [/data/databases/graph.db/neostore.counts.db.b], from [/data/databases/graph.db/neostore.counts.db.a].
+2020-01-06 16:13:47.935+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 86 checkpoint completed in 58ms
+2020-01-06 16:13:47.937+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0
+2020-01-06 16:14:44.671+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x1213cf8b, L:/172.27.0.2:7687 - R:/172.27.0.3:55138]
+2020-01-06 16:14:53.612+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 915 seconds: 
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Kernel") yield attributes
+RETURN {name: 'Kernel', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Store file sizes") yield attributes
+RETURN {name: 'Store file sizes', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Configuration") yield attributes
+RETURN {name: 'Configuration', data: collect(attributes)} as result
+
+2020-01-06 16:14:53.614+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 915 seconds: 
+CALL db.labels() YIELD label
+RETURN {name:'labels', data:COLLECT(label)[..1000]} as result
+UNION ALL
+CALL db.relationshipTypes() YIELD relationshipType
+RETURN {name:'relationshipTypes', data:COLLECT(relationshipType)[..1000]} as result
+UNION ALL
+CALL db.propertyKeys() YIELD propertyKey
+RETURN {name:'propertyKeys', data:COLLECT(propertyKey)[..1000]} as result
+UNION ALL
+CALL dbms.functions() YIELD name, signature, description
+RETURN {name:'functions', data: collect({name: name, signature: signature, description: description})} AS result
+UNION ALL
+CALL dbms.procedures() YIELD name, signature, description
+RETURN {name:'procedures', data:collect({name: name, signature: signature, description: description})} as result
+UNION ALL
+MATCH () RETURN { name:'nodes', data:count(*) } AS result
+UNION ALL
+MATCH ()-[]->() RETURN { name:'relationships', data: count(*)} AS result
+
+2020-01-06 16:14:55.261+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x7893a9e0, L:/172.27.0.2:7687 - R:/172.27.0.3:55144]
+2020-01-06 16:18:03.582+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=294, gcTime=0, gcCount=0}
+2020-01-06 16:19:26.196+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x59281777, L:/172.27.0.2:7687 - R:/172.27.0.3:55156]
+2020-01-06 16:21:06.543+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=193, gcTime=0, gcCount=0}
+2020-01-06 16:21:46.404+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x60c9c3bc, L:/172.27.0.2:7687 - R:/172.27.0.3:55162]
+2020-01-06 16:23:19.701+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 1409 seconds: EXPLAIN MATCH (n:Event) RETURN n
+2020-01-06 16:23:20.002+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 1409 seconds: MATCH (a)-[r]->(b) WHERE id(a) IN $existingNodeIds AND id(b) IN $newNodeIds RETURN r;
+2020-01-06 16:28:47.056+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 94 checkpoint started...
+2020-01-06 16:28:47.087+0000 INFO [o.n.k.i.s.c.CountsTracker] Rotated counts store at transaction 94 to [/data/databases/graph.db/neostore.counts.db.a], from [/data/databases/graph.db/neostore.counts.db.b].
+2020-01-06 16:28:47.095+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 94 checkpoint completed in 38ms
+2020-01-06 16:28:47.096+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0
+2020-01-06 16:43:07.577+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=176, gcTime=0, gcCount=0}
+2020-01-06 16:44:35.608+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 2691 seconds: EXPLAIN MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons.Name, persons.Age
+2020-01-06 16:44:36.161+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 95 checkpoint started...
+2020-01-06 16:44:36.202+0000 INFO [o.n.k.i.s.c.CountsTracker] Rotated counts store at transaction 95 to [/data/databases/graph.db/neostore.counts.db.b], from [/data/databases/graph.db/neostore.counts.db.a].
+2020-01-06 16:44:36.218+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Scheduled checkpoint for time threshold" @ txId: 95 checkpoint completed in 54ms
+2020-01-06 16:44:36.219+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0
+2020-01-06 16:44:36.796+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 2686 seconds: EXPLAIN MATCH (n:Person) RETURN n
+2020-01-06 16:46:04.946+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 1365 seconds: EXPLAIN MATCH (n:Event) RETURN n
+2020-01-06 16:46:05.465+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 89 seconds: EXPLAIN MATCH (persons:Person) - [:ATTENDED] -> (events:Event) RETURN persons.Name, persons.Age
+2020-01-06 16:46:06.240+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 1872 seconds: 
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Kernel") yield attributes
+RETURN {name: 'Kernel', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Store file sizes") yield attributes
+RETURN {name: 'Store file sizes', data: collect(attributes)} as result
+UNION ALL
+CALL dbms.queryJmx("org.neo4j:instance=*,name=Configuration") yield attributes
+RETURN {name: 'Configuration', data: collect(attributes)} as result
+
+2020-01-06 16:46:06.241+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 1872 seconds: 
+CALL db.labels() YIELD label
+RETURN {name:'labels', data:COLLECT(label)[..1000]} as result
+UNION ALL
+CALL db.relationshipTypes() YIELD relationshipType
+RETURN {name:'relationshipTypes', data:COLLECT(relationshipType)[..1000]} as result
+UNION ALL
+CALL db.propertyKeys() YIELD propertyKey
+RETURN {name:'propertyKeys', data:COLLECT(propertyKey)[..1000]} as result
+UNION ALL
+CALL dbms.functions() YIELD name, signature, description
+RETURN {name:'functions', data: collect({name: name, signature: signature, description: description})} AS result
+UNION ALL
+CALL dbms.procedures() YIELD name, signature, description
+RETURN {name:'procedures', data:collect({name: name, signature: signature, description: description})} as result
+UNION ALL
+MATCH () RETURN { name:'nodes', data:count(*) } AS result
+UNION ALL
+MATCH ()-[]->() RETURN { name:'relationships', data: count(*)} AS result
+
+2020-01-06 16:46:08.319+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 91 seconds: EXPLAIN MATCH (n:Person) RETURN n
+2020-01-06 16:46:15.172+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 1375 seconds: MATCH (a)-[r]->(b) WHERE id(a) IN $existingNodeIds AND id(b) IN $newNodeIds RETURN r;
+2020-01-06 16:47:24.852+0000 WARN [o.n.b.t.p.HouseKeeper] Fatal error occurred when handling a client connection, remote peer unexpectedly closed connection: [id: 0x41c61720, L:/172.27.0.2:7687 - R:/172.27.0.3:55204]
+2020-01-06 16:48:46.736+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 2102 seconds: CREATE(event:Event) SET event = $prop RETURN event
+2020-01-06 16:48:50.891+0000 INFO [o.n.c.i.ExecutionEngine] Discarded stale query from the query cache after 263 seconds: CREATE(person:Person) SET person = $prop RETURN person
